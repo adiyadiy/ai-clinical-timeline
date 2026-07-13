@@ -74,3 +74,30 @@ class PatientTimeline(BaseModel):
             return None
         dates = [s.session_date for s in self.sessions]
         return min(dates), max(dates)
+
+
+class SupportingEvidence(BaseModel):
+    session_date: date  # must be a real session date from this timeline
+    evidence_quote: str  # must be a verbatim substring of that session's extracted data
+
+
+class NotableChange(BaseModel):
+    description: str
+    supporting_evidence: list[SupportingEvidence]
+
+
+class ExtractedSynthesis(BaseModel):
+    """What the LLM produces."""
+    trajectory_summary: str
+    notable_changes: list[NotableChange] = []
+    risk_summary: str
+
+
+class TimelineSynthesis(ExtractedSynthesis):
+    """Final artifact: LLM output + identifiers the pipeline already knows."""
+    patient_id: str
+    session_count: int
+    date_range_start: date
+    date_range_end: date
+    model_version: str
+    generated_at: datetime
